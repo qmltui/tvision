@@ -1,0 +1,6 @@
+build*/
+.qmltui/
+.qtcreator/
+/.vscode/
+.qmlls.ini
+examples/*/.qmlls.ini

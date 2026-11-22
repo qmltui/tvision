@@ -23,7 +23,7 @@ if(_tvision_is_top_level)
     if(QMLTUI_TVISION_BUILD_TESTS)
         include(CTest)
     endif()
-    if(NOT TARGET QmlTui::Core AND NOT TARGET qmltui::core)
+    if(NOT TARGET QmlTui::Core)
         if(QMLTUI_USE_INSTALLED)
             find_package(Qt6 6.8 REQUIRED COMPONENTS Core Qml)
             qt_standard_project_setup(REQUIRES 6.8)
@@ -73,16 +73,8 @@ set_source_files_properties(
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
-if(TARGET QmlTui::Core)
-    set(_tv_core_target QmlTui::Core)
-    set(_tv_controls_target QmlTui::Controls)
-else()
-    set(_tv_core_target qmltui::core)
-    set(_tv_controls_target qmltui::controls)
-endif()
-
 set(_tvision_module_deps)
-get_target_property(_qmltui_is_imported ${_tv_core_target} IMPORTED)
+get_target_property(_qmltui_is_imported QmlTui::Core IMPORTED)
 if(_qmltui_is_imported)
     if(QmlTui_QML_IMPORT_PATH)
         list(APPEND _tvision_module_deps IMPORT_PATH "${QmlTui_QML_IMPORT_PATH}")
@@ -90,8 +82,8 @@ if(_qmltui_is_imported)
 else()
     list(APPEND _tvision_module_deps
         DEPENDENCIES
-            TARGET ${_tv_core_target}
-            TARGET ${_tv_controls_target}
+            TARGET QmlTui::Core
+            TARGET QmlTui::Controls
     )
 endif()
 
@@ -133,8 +125,8 @@ target_link_libraries(QmlTuiTVision
     PUBLIC
         Qt6::Core
         Qt6::Qml
-        ${_tv_core_target}
-        ${_tv_controls_target}
+        QmlTui::Core
+        QmlTui::Controls
     INTERFACE
         QmlTuiTVisionplugin
 )
@@ -142,9 +134,7 @@ target_link_libraries(QmlTuiTVision
 if(NOT TARGET QmlTui::TVision)
     add_library(QmlTui::TVision ALIAS QmlTuiTVision)
 endif()
-if(NOT TARGET qmltui::tvision)
-    add_library(qmltui::tvision ALIAS QmlTuiTVision)
-endif()
+
 
 if(QMLTUI_TVISION_BUILD_TESTS)
     qt_add_executable(tst_tvision_primitives
@@ -154,7 +144,7 @@ if(QMLTUI_TVISION_BUILD_TESTS)
         Qt6::Core
         Qt6::Qml
         Qt6::Test
-        ${_tv_core_target}
+        QmlTui::Core
         QmlTui::TVision
     )
     add_test(NAME tst_tvision_primitives COMMAND tst_tvision_primitives)

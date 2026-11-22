@@ -13,6 +13,9 @@ Popup {
     // or `{ separator: true }`
     property var items: []
     property int currentIndex: 0
+    property TvPalette palette: null
+
+    readonly property TvPalette effectivePalette: menuPopup.palette ? menuPopup.palette : TvTheme.activePalette
 
     readonly property int computedInnerWidth: {
         let maxW = 16;
@@ -103,9 +106,9 @@ Popup {
         id: menuFrame
 
         anchors.fill: parent
-        color: TvTheme.barBg
+        color: menuPopup.effectivePalette.barBg
         border.style: Border.Single
-        border.color: TvTheme.barBorderFg
+        border.color: menuPopup.effectivePalette.barBorderFg
 
         Item {
             id: keyScope
@@ -173,9 +176,9 @@ Popup {
                         readonly property string rawLabel: rowItem.isSep ? "" : String(rowItem.modelData.text || "")
                         readonly property string plainLabel: TvMnemonic.strip(rowItem.rawLabel)
                         readonly property string shortcutText: (!rowItem.isSep && rowItem.modelData.shortcut) ? String(rowItem.modelData.shortcut) : ""
-                        readonly property color rowBg: rowItem.selected ? TvTheme.barSelectedBg : TvTheme.barBg
-                        readonly property color rowFg: !rowItem.itemEnabled ? TvTheme.barDisabledFg : rowItem.selected ? TvTheme.barSelectedFg : TvTheme.barFg
-                        readonly property color rowHotkeyFg: !rowItem.itemEnabled ? TvTheme.barDisabledFg : rowItem.selected ? TvTheme.barSelectedHotkeyFg : TvTheme.barHotkeyFg
+                        readonly property color rowBg: rowItem.selected ? menuPopup.effectivePalette.barSelectedBg : menuPopup.effectivePalette.barBg
+                        readonly property color rowFg: !rowItem.itemEnabled ? menuPopup.effectivePalette.barDisabledFg : rowItem.selected ? menuPopup.effectivePalette.barSelectedFg : menuPopup.effectivePalette.barFg
+                        readonly property color rowHotkeyFg: !rowItem.itemEnabled ? menuPopup.effectivePalette.barDisabledFg : rowItem.selected ? menuPopup.effectivePalette.barSelectedHotkeyFg : menuPopup.effectivePalette.barHotkeyFg
 
                         width: menuPopup.computedInnerWidth
                         height: 1
@@ -190,7 +193,7 @@ Popup {
                             visible: !rowItem.isSep
                             x: 1
                             y: 0
-                            spans: TvMnemonic.buildSpans(rowItem.rawLabel, rowItem.rowFg, rowItem.rowHotkeyFg, rowItem.rowBg, rowItem.selected && TvTheme.isMonochrome, TvTheme.isMonochrome)
+                            spans: TvMnemonic.buildSpans(rowItem.rawLabel, rowItem.rowFg, rowItem.rowHotkeyFg, rowItem.rowBg, rowItem.selected && menuPopup.effectivePalette.isMonochrome, menuPopup.effectivePalette.isMonochrome)
                         }
 
                         Text {
@@ -238,8 +241,8 @@ Popup {
                 y: sepOverlay.index + 1
                 z: 2
                 text: "├" + "─".repeat(Math.max(0, menuPopup.width - 2)) + "┤"
-                color: TvTheme.barBorderFg
-                backgroundColor: TvTheme.barBg
+                color: menuPopup.effectivePalette.barBorderFg
+                backgroundColor: menuPopup.effectivePalette.barBg
             }
         }
     }

@@ -13,6 +13,9 @@ Popup {
 
     property string title: "Dialog"
     property bool closable: true
+    property TvPalette palette: null
+
+    readonly property TvPalette effectivePalette: dialog.palette ? dialog.palette : TvTheme.activePalette
 
     readonly property int maxTitleLen: Math.max(0, dialog.width - 10)
     readonly property string shownTitle: dialog.title.length > dialog.maxTitleLen ? dialog.title.slice(0, dialog.maxTitleLen) : dialog.title
@@ -64,9 +67,9 @@ Popup {
 
     Rectangle {
         anchors.fill: parent
-        color: TvTheme.dialogBg
+        color: dialog.effectivePalette.dialogBg
         border.style: Border.Double
-        border.color: TvTheme.dialogActiveBorder
+        border.color: dialog.effectivePalette.dialogActiveBorder
 
         Text {
             visible: dialog.closable && dialog.width >= 10
@@ -74,15 +77,15 @@ Popup {
             y: 0
             z: 1.5
             spans: [QmlTui.span("[", {
-                    color: TvTheme.dialogActiveBorder,
-                    backgroundColor: TvTheme.dialogBg
+                    color: dialog.effectivePalette.dialogActiveBorder,
+                    backgroundColor: dialog.effectivePalette.dialogBg
                 }), QmlTui.span("■", {
-                    color: TvTheme.dialogControlFg,
-                    backgroundColor: TvTheme.dialogBg,
+                    color: dialog.effectivePalette.dialogControlFg,
+                    backgroundColor: dialog.effectivePalette.dialogBg,
                     bold: true
                 }), QmlTui.span("]", {
-                    color: TvTheme.dialogActiveBorder,
-                    backgroundColor: TvTheme.dialogBg
+                    color: dialog.effectivePalette.dialogActiveBorder,
+                    backgroundColor: dialog.effectivePalette.dialogBg
                 })]
         }
 
@@ -104,8 +107,8 @@ Popup {
             y: 0
             z: 1.5
             text: " " + dialog.shownTitle + " "
-            color: TvTheme.dialogActiveBorder
-            backgroundColor: TvTheme.dialogBg
+            color: dialog.effectivePalette.dialogActiveBorder
+            backgroundColor: dialog.effectivePalette.dialogBg
             bold: true
         }
 

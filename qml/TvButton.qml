@@ -11,16 +11,18 @@ Item {
 
     property string text: "~O~K"
     property bool isDefault: false
-    property color surfaceColor: TvTheme.dialogBg
+    property TvPalette palette: null
+    property color surfaceColor: control.effectivePalette.dialogBg
 
+    readonly property TvPalette effectivePalette: control.palette ? control.palette : TvTheme.activePalette
     readonly property string plainText: TvMnemonic.strip(control.text)
     readonly property string mnemonic: TvMnemonic.mnemonicChar(control.text)
     readonly property bool down: mouseArea.containsPress || control.keyDown
     property bool keyDown: false
 
     readonly property int faceWidth: Math.max(8, control.width - 1)
-    readonly property color activeFaceBg: !control.enabled ? TvTheme.barDisabledFg : (control.activeFocus || mouseArea.containsMouse) ? TvTheme.buttonFocusedBg : TvTheme.buttonBg
-    readonly property color activeFaceFg: control.activeFocus ? TvTheme.buttonDefaultFg : TvTheme.buttonFg
+    readonly property color activeFaceBg: !control.enabled ? control.effectivePalette.barDisabledFg : (control.activeFocus || mouseArea.containsMouse) ? control.effectivePalette.buttonFocusedBg : control.effectivePalette.buttonBg
+    readonly property color activeFaceFg: control.activeFocus ? control.effectivePalette.buttonDefaultFg : control.effectivePalette.buttonFg
 
     signal clicked
 
@@ -80,7 +82,7 @@ Item {
             spans: {
                 const leftMark = control.isDefault ? "◄ " : "  ";
                 const rightMark = control.isDefault ? " ►" : "  ";
-                return TvMnemonic.buildSpans(leftMark + control.text + rightMark, control.activeFaceFg, TvTheme.buttonHotkeyFg, control.activeFaceBg, control.activeFocus || control.isDefault, TvTheme.isMonochrome);
+                return TvMnemonic.buildSpans(leftMark + control.text + rightMark, control.activeFaceFg, control.effectivePalette.buttonHotkeyFg, control.activeFaceBg, control.activeFocus || control.isDefault, control.effectivePalette.isMonochrome);
             }
         }
     }
@@ -91,7 +93,7 @@ Item {
         y: 0
         visible: !control.down
         text: "▄"
-        color: TvTheme.buttonShadowFg
+        color: control.effectivePalette.buttonShadowFg
         backgroundColor: control.surfaceColor
     }
 
@@ -101,7 +103,7 @@ Item {
         y: 1
         visible: !control.down
         text: "▀".repeat(Math.max(0, control.faceWidth))
-        color: TvTheme.buttonShadowFg
+        color: control.effectivePalette.buttonShadowFg
         backgroundColor: control.surfaceColor
     }
 

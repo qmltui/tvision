@@ -13,6 +13,9 @@ Item {
 
     property var activeWindow: null
     property int topZCounter: 10
+    property TvPalette palette: null
+
+    readonly property TvPalette effectivePalette: desktop.palette ? desktop.palette : TvTheme.activePalette
 
     signal windowClosed(var window)
     signal closeIntercepted(var window)
@@ -280,8 +283,8 @@ Item {
     TvDesktopSurface {
         anchors.fill: parent
         pattern: TvTheme.desktopPattern
-        foregroundColor: TvTheme.desktopFg
-        backgroundColor: TvTheme.desktopBg
+        foregroundColor: desktop.effectivePalette.desktopFg
+        backgroundColor: desktop.effectivePalette.desktopBg
     }
 
     Item {

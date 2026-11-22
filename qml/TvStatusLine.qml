@@ -11,12 +11,15 @@ Rectangle {
     // Array of `{ key: "F1", label: "Help", action: "help.shortcuts" }`
     property var hints: []
     property string statusText: ""
+    property TvPalette palette: null
+
+    readonly property TvPalette effectivePalette: statusLine.palette ? statusLine.palette : TvTheme.activePalette
 
     signal actionTriggered(string actionId)
 
     height: 1
     implicitHeight: 1
-    color: TvTheme.barBg
+    color: statusLine.effectivePalette.barBg
     clip: true
 
     Row {
@@ -49,14 +52,14 @@ Rectangle {
 
                     height: 1
                     spans: {
-                        const bg = hintDelegate.highlighted ? TvTheme.barSelectedBg : TvTheme.barBg;
-                        const keyFg = hintDelegate.highlighted ? TvTheme.barSelectedHotkeyFg : TvTheme.barHotkeyFg;
-                        const lblFg = hintDelegate.highlighted ? TvTheme.barSelectedFg : TvTheme.barFg;
+                        const bg = hintDelegate.highlighted ? statusLine.effectivePalette.barSelectedBg : statusLine.effectivePalette.barBg;
+                        const keyFg = hintDelegate.highlighted ? statusLine.effectivePalette.barSelectedHotkeyFg : statusLine.effectivePalette.barHotkeyFg;
+                        const lblFg = hintDelegate.highlighted ? statusLine.effectivePalette.barSelectedFg : statusLine.effectivePalette.barFg;
                         return [QmlTui.span(" " + hintDelegate.keyText + " ", {
                                 color: keyFg,
                                 backgroundColor: bg,
                                 bold: true,
-                                underline: TvTheme.isMonochrome
+                                underline: statusLine.effectivePalette.isMonochrome
                             }), QmlTui.span(hintDelegate.labelText + " ", {
                                 color: lblFg,
                                 backgroundColor: bg,
@@ -85,7 +88,7 @@ Rectangle {
         anchors.rightMargin: 1
         y: 0
         text: "│ " + statusLine.statusText
-        color: TvTheme.barFg
-        backgroundColor: TvTheme.barBg
+        color: statusLine.effectivePalette.barFg
+        backgroundColor: statusLine.effectivePalette.barBg
     }
 }

@@ -26,6 +26,7 @@ FocusScope {
     property int minWidth: 22
     property int minHeight: 6
     property Item preferredFocusItem: null
+    property TvPalette palette: null
 
     property int savedX: 2
     property int savedY: 1
@@ -40,17 +41,18 @@ FocusScope {
     readonly property int hostWidth: win.parent ? win.parent.width : 80
     readonly property int hostHeight: win.parent ? win.parent.height : 22
     readonly property bool isDialogRole: win.paletteRole === "dialog"
+    readonly property TvPalette effectivePalette: win.palette ? win.palette : TvTheme.activePalette
 
-    readonly property color surfaceBg: win.isDialogRole ? TvTheme.dialogBg : TvTheme.winBg
-    readonly property color surfaceFg: win.isDialogRole ? TvTheme.dialogFg : TvTheme.winFg
+    readonly property color surfaceBg: win.isDialogRole ? win.effectivePalette.dialogBg : win.effectivePalette.winBg
+    readonly property color surfaceFg: win.isDialogRole ? win.effectivePalette.dialogFg : win.effectivePalette.winFg
     readonly property color frameColor: {
         if (win.moveResizeMode)
-            return TvTheme.winMoveBorder;
+            return win.effectivePalette.winMoveBorder;
         if (win.active)
-            return win.isDialogRole ? TvTheme.dialogActiveBorder : TvTheme.winActiveBorder;
-        return win.isDialogRole ? TvTheme.dialogInactiveBorder : TvTheme.winInactiveBorder;
+            return win.isDialogRole ? win.effectivePalette.dialogActiveBorder : win.effectivePalette.winActiveBorder;
+        return win.isDialogRole ? win.effectivePalette.dialogInactiveBorder : win.effectivePalette.winInactiveBorder;
     }
-    readonly property color controlGlyphFg: win.isDialogRole ? TvTheme.dialogControlFg : TvTheme.winControlFg
+    readonly property color controlGlyphFg: win.isDialogRole ? win.effectivePalette.dialogControlFg : win.effectivePalette.winControlFg
 
     readonly property string rightBadgeText: {
         let parts = [];

@@ -27,16 +27,18 @@ function main(app) {
     app.press("A");
     app.sleep(700);
 
-    // Cycle Borland / Cyan / Dark DOS / Monochrome themes
-    app.marker("Per-File TvPalette Themes (F9)");
-    app.press("F9");
-    app.sleep(600);
-    app.press("F9");
-    app.sleep(600);
+    // Cycle Borland / Cyan / Dark DOS / Monochrome / Custom Amber CRT themes
+    app.marker("Built-In & Custom TvPalette Themes (F9)");
     app.press("F9");
     app.sleep(550);
     app.press("F9");
-    app.sleep(800);
+    app.sleep(550);
+    app.press("F9");
+    app.sleep(550);
+    app.press("F9");
+    app.sleep(750);
+    app.press("F9");
+    app.sleep(750);
 
     app.stopRecording();
 }

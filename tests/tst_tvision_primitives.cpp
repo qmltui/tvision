@@ -1,7 +1,11 @@
 #include "TvDesktopSurface.h"
 #include "TvDragHandle.h"
 #include "TvDropShadow.h"
+#include "TvPalette.h"
 
+#include <QQmlComponent>
+#include <QQmlEngine>
+#include <QSignalSpy>
 #include <QmlTui/Core/Engine/MouseEvent.h>
 #include <QmlTui/Core/Primitives/TextGridBuffer.h>
 #include <QtTest/QtTest>
@@ -131,6 +135,182 @@ private slots:
     QCOMPARE(deltas.size(), 2);
     QCOMPARE(deltas[0], QPoint(1, 0));
     QCOMPARE(deltas[1], QPoint(2, 0));
+  }
+
+  void tvPaletteApplyMapCopyFromAndRoundTrip() {
+    TvPalette pal;
+    QSignalSpy spy(&pal, &TvPalette::paletteChanged);
+
+    QVariantMap tokens;
+    tokens.insert(QStringLiteral("schemeId"), QStringLiteral("amber_crt"));
+    tokens.insert(QStringLiteral("schemeTitle"), QStringLiteral("Amber CRT"));
+    tokens.insert(QStringLiteral("description"),
+                  QStringLiteral("Amber Phosphor"));
+    tokens.insert(QStringLiteral("isMonochrome"), true);
+    tokens.insert(QStringLiteral("winBg"), QStringLiteral("#1a0d00"));
+    tokens.insert(QStringLiteral("winFg"), QStringLiteral("ansi:brightyellow"));
+    tokens.insert(QStringLiteral("dialogBg"), QStringLiteral("default"));
+
+    QVERIFY(pal.applyMap(tokens));
+    // Batch update emits paletteChanged() exactly once
+    QCOMPARE(spy.count(), 1);
+
+    // Re-applying identical values does not emit redundant notifications
+    QVERIFY(pal.applyMap(tokens));
+    QCOMPARE(spy.count(), 1);
+
+    const QVariantMap exported = pal.toMap();
+    QCOMPARE(exported.value(QStringLiteral("schemeId")).toString(),
+             QStringLiteral("amber_crt"));
+    QCOMPARE(exported.value(QStringLiteral("schemeTitle")).toString(),
+             QStringLiteral("Amber CRT"));
+    QCOMPARE(exported.value(QStringLiteral("isMonochrome")).toBool(), true);
+    QCOMPARE(exported.value(QStringLiteral("winBg")).toString(),
+             QStringLiteral("#1a0d00"));
+    QCOMPARE(exported.value(QStringLiteral("winFg")).toString(),
+             QStringLiteral("ansi:brightyellow"));
+    QCOMPARE(exported.value(QStringLiteral("dialogBg")).toString(),
+             QStringLiteral("default"));
+
+    TvPalette cloned;
+    QSignalSpy cloneSpy(&cloned, &TvPalette::paletteChanged);
+    cloned.copyFrom(&pal);
+    QCOMPARE(cloneSpy.count(), 1);
+    QCOMPARE(cloned.toMap(), exported);
+
+    cloned.reset();
+    QCOMPARE(cloned.property("schemeId").toString(),
+             QStringLiteral("borland_blue"));
+    QCOMPARE(cloned.property("isMonochrome").toBool(), false);
+  }
+
+  void tvThemeCustomSchemesOverridesAndScopedControlPalettes() {
+    QQmlEngine engine;
+    QQmlComponent comp(&engine);
+    comp.setData(
+        R"qml(
+            pragma ComponentBehavior: Bound
+            import QtQml
+            import QmlTui
+            import QmlTui.TVision
+
+            Item {
+                id: root
+
+                property alias winSurfaceBg: mainWin.surfaceBg
+                property alias alertWinSurfaceBg: alertWin.surfaceBg
+                property string activeId: TvTheme.schemeId
+                property color activeWinBg: TvTheme.winBg
+                property int totalSchemes: TvTheme.schemeCount
+
+                DarkDosTheme {
+                    id: draculaTheme
+                    schemeId: "dracula"
+                    schemeTitle: "Dracula"
+                    description: "Dracula Dark"
+                    winBg: "#282a36"
+                    winFg: "#f8f8f2"
+                }
+
+                TvPalette {
+                    id: crimsonAlert
+                    schemeId: "crimson_alert"
+                    winBg: "#550000"
+                    dialogBg: "#660000"
+                }
+
+                TvWindow {
+                    id: mainWin
+                }
+
+                TvWindow {
+                    id: alertWin
+                    palette: crimsonAlert
+                }
+
+                function registerDracula(): int {
+                    return TvTheme.registerScheme(draculaTheme);
+                }
+
+                function selectDracula() {
+                    TvTheme.setScheme("dracula");
+                }
+
+                function registerJsonTheme() {
+                    TvTheme.registerThemeObject({
+                        baseScheme: "dark_dos",
+                        schemeId: "gruvbox",
+                        schemeTitle: "Gruvbox",
+                        winBg: "#282828"
+                    });
+                    TvTheme.setScheme("gruvbox");
+                }
+
+                function applyLiveOverride() {
+                    TvTheme.applyCustomTheme({
+                        baseScheme: "borland_blue",
+                        schemeId: "ephemeral",
+                        winBg: "#112233"
+                    });
+                }
+
+                function customOnlyMode() {
+                    TvTheme.clearCustomPalette();
+                    TvTheme.includeBuiltInSchemes = false;
+                    TvTheme.setSchemeByIndex(0);
+                }
+            }
+        )qml",
+        QUrl(QStringLiteral("qrc:/test_custom_theme.qml")));
+
+    QVERIFY2(comp.isReady(), qPrintable(comp.errorString()));
+    std::unique_ptr<QObject> root(comp.create());
+    QVERIFY(root != nullptr);
+
+    // Default global theme is Borland Blue, while alertWin uses its scoped
+    // crimsonAlert palette independently.
+    QCOMPARE(root->property("activeId").toString(),
+             QStringLiteral("borland_blue"));
+    QCOMPARE(root->property("totalSchemes").toInt(), 4);
+    QCOMPARE(root->property("winSurfaceBg").value<Color>(),
+             Color::fromString(QStringLiteral("#0000aa")));
+    QCOMPARE(root->property("alertWinSurfaceBg").value<Color>(),
+             Color::fromString(QStringLiteral("#550000")));
+
+    // Register declarative DarkDosTheme subclass into TvTheme
+    int idx = -1;
+    QVERIFY(QMetaObject::invokeMethod(root.get(), "registerDracula",
+                                      Q_RETURN_ARG(int, idx)));
+    QCOMPARE(idx, 4);
+    QCOMPARE(root->property("totalSchemes").toInt(), 5);
+
+    QVERIFY(QMetaObject::invokeMethod(root.get(), "selectDracula"));
+    QCOMPARE(root->property("activeId").toString(), QStringLiteral("dracula"));
+    QCOMPARE(root->property("winSurfaceBg").value<Color>(),
+             Color::fromString(QStringLiteral("#282a36")));
+    // Scoped alertWin remains unaffected by global TvTheme switch
+    QCOMPARE(root->property("alertWinSurfaceBg").value<Color>(),
+             Color::fromString(QStringLiteral("#550000")));
+
+    // Register a JS/JSON object theme inheriting from dark_dos
+    QVERIFY(QMetaObject::invokeMethod(root.get(), "registerJsonTheme"));
+    QCOMPARE(root->property("totalSchemes").toInt(), 6);
+    QCOMPARE(root->property("activeId").toString(), QStringLiteral("gruvbox"));
+    QCOMPARE(root->property("activeWinBg").value<Color>(),
+             Color::fromString(QStringLiteral("#282828")));
+
+    // Ephemeral one-shot override via applyCustomTheme()
+    QVERIFY(QMetaObject::invokeMethod(root.get(), "applyLiveOverride"));
+    QCOMPARE(root->property("activeId").toString(),
+             QStringLiteral("ephemeral"));
+    QCOMPARE(root->property("winSurfaceBg").value<Color>(),
+             Color::fromString(QStringLiteral("#112233")));
+
+    // Custom-only mode (includeBuiltInSchemes = false) restricts list to the 2
+    // registered custom themes ("dracula" and "gruvbox")
+    QVERIFY(QMetaObject::invokeMethod(root.get(), "customOnlyMode"));
+    QCOMPARE(root->property("totalSchemes").toInt(), 2);
+    QCOMPARE(root->property("activeId").toString(), QStringLiteral("dracula"));
   }
 };
 

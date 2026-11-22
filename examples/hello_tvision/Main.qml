@@ -5,7 +5,7 @@ import QmlTui
 import QmlTui.TVision
 
 // Minimal self-contained example demonstrating TvMenuBar, TvDesktop, TvWindow,
-// TvDialog, TvButton, TvStatusLine, and switchable TvTheme palettes.
+// TvDialog, TvButton, TvStatusLine, and built-in + custom TvPalette themes.
 Terminal {
     id: root
 
@@ -18,9 +18,13 @@ Terminal {
             desktop.cascade();
         else if (action === "theme")
             TvTheme.cycleScheme();
+        else if (action === "amber")
+            TvTheme.setScheme("amber_crt");
         else if (action === "quit")
             Qt.quit();
     }
+
+    Component.onCompleted: TvTheme.registerScheme(amberTheme)
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
@@ -102,11 +106,49 @@ Terminal {
                         text: "Cycle ~T~heme",
                         shortcut: "F9",
                         action: "theme"
+                    },
+                    {
+                        text: "~A~mber CRT (Custom)",
+                        shortcut: "",
+                        action: "amber"
                     }
                 ]
             }
         ]
         onActionTriggered: actionId => root.dispatch(actionId)
+    }
+
+    DarkDosTheme {
+        id: amberTheme
+
+        schemeId: "amber_crt"
+        schemeTitle: "Amber CRT"
+        description: "Amber CRT (Custom Phosphor)"
+        desktopBg: "#120900"
+        desktopFg: "#5c3300"
+        barBg: "#2b1800"
+        barFg: "#ffd080"
+        barHotkeyFg: "#ff9000"
+        barSelectedBg: "#cc7a00"
+        barSelectedFg: "#120900"
+        barSelectedHotkeyFg: "#120900"
+        barBorderFg: "#cc7a00"
+        winBg: "#1a0d00"
+        winFg: "#ffb000"
+        winMutedFg: "#cc8400"
+        winActiveBorder: "#ffd866"
+        winInactiveBorder: "#7a4b00"
+        winControlFg: "#ffd866"
+        dialogBg: "#241300"
+        dialogFg: "#ffd080"
+        dialogMutedFg: "#b37400"
+        dialogActiveBorder: "#ffd866"
+        dialogControlFg: "#ffb000"
+        buttonBg: "#cc7a00"
+        buttonFocusedBg: "#ffb000"
+        buttonFg: "#120900"
+        buttonDefaultFg: "#120900"
+        buttonHotkeyFg: "#ffffff"
     }
 
     TvDesktop {

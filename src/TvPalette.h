@@ -2,14 +2,15 @@
 
 #include <QObject>
 #include <QString>
+#include <QVariantMap>
 #include <QmlTui/Core/Primitives/Color.h>
 #include <QtQml/qqmlregistration.h>
 
 namespace qmltui::tvision {
 
 // Declarative color-scheme token set for QmlTui.TVision themes.
-// Each theme `.qml` file instantiates `TvPalette` with its own color values,
-// avoiding multi-way conditional chains inside `TvTheme.qml`.
+// Instantiate `TvPalette` (or subclass a built-in theme such as `DarkDosTheme`)
+// in QML, or populate tokens dynamically via `copyFrom()` / `applyMap()`.
 class TvPalette : public QObject {
   Q_OBJECT
   QML_ELEMENT
@@ -94,10 +95,32 @@ public:
   explicit TvPalette(QObject *parent = nullptr);
   ~TvPalette() override = default;
 
+  // Resets all metadata and color tokens to the default Borland Blue baseline.
+  Q_INVOKABLE void reset();
+
+  // Copies all metadata and color tokens from `source`, emitting
+  // `paletteChanged()` at most once.
+  Q_INVOKABLE void copyFrom(const qmltui::tvision::TvPalette *source);
+
+  // Applies matching metadata and color keys from `tokens` (accepting hex,
+  // CSS named colors, `ansi:...`, `default`, `transparent`, or `qmltui::Color`
+  // values). Emits `paletteChanged()` once if any value changed and returns
+  // `true` when at least one valid token key was recognized.
+  Q_INVOKABLE bool applyMap(const QVariantMap &tokens);
+
+  // Exports all metadata and color tokens into a serializable map.
+  Q_INVOKABLE QVariantMap toMap() const;
+
 signals:
   void paletteChanged();
 
 private:
+  struct ColorTokenEntry {
+    const char *name;
+    qmltui::Color TvPalette::*member;
+  };
+  static const ColorTokenEntry s_colorTokens[];
+
   QString m_schemeId = QStringLiteral("borland_blue");
   QString m_schemeTitle = QStringLiteral("Borland Blue");
   QString m_description = QStringLiteral("Borland Blue (Classic C++ IDE)");

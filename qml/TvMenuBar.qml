@@ -16,6 +16,9 @@ Rectangle {
     property int activeMenuIndex: -1
     property bool barFocused: false
     property string rightStatusText: ""
+    property TvPalette palette: null
+
+    readonly property TvPalette effectivePalette: menuBar.palette ? menuBar.palette : TvTheme.activePalette
 
     readonly property bool menuOpen: pullDown.visible && menuBar.activeMenuIndex >= 0
     readonly property bool barActive: menuBar.barFocused || menuBar.menuOpen
@@ -97,7 +100,7 @@ Rectangle {
 
     height: 1
     implicitHeight: 1
-    color: TvTheme.barBg
+    color: menuBar.effectivePalette.barBg
 
     Shortcut {
         sequence: "F10"
@@ -207,9 +210,9 @@ Rectangle {
                 readonly property string rawTitle: String(topItem.modelData.title || "")
                 readonly property string plainTitle: TvMnemonic.strip(topItem.rawTitle)
                 readonly property bool selected: menuBar.barActive && menuBar.activeMenuIndex === topItem.index
-                readonly property color itemBg: topItem.selected ? TvTheme.barSelectedBg : TvTheme.barBg
-                readonly property color itemFg: topItem.selected ? TvTheme.barSelectedFg : TvTheme.barFg
-                readonly property color itemHotkeyFg: topItem.selected ? TvTheme.barSelectedHotkeyFg : TvTheme.barHotkeyFg
+                readonly property color itemBg: topItem.selected ? menuBar.effectivePalette.barSelectedBg : menuBar.effectivePalette.barBg
+                readonly property color itemFg: topItem.selected ? menuBar.effectivePalette.barSelectedFg : menuBar.effectivePalette.barFg
+                readonly property color itemHotkeyFg: topItem.selected ? menuBar.effectivePalette.barSelectedHotkeyFg : menuBar.effectivePalette.barHotkeyFg
 
                 width: topItem.plainTitle.length + 2
                 height: 1
@@ -222,7 +225,7 @@ Rectangle {
                 Text {
                     x: 1
                     y: 0
-                    spans: TvMnemonic.buildSpans(topItem.rawTitle, topItem.itemFg, topItem.itemHotkeyFg, topItem.itemBg, topItem.selected && TvTheme.isMonochrome, TvTheme.isMonochrome)
+                    spans: TvMnemonic.buildSpans(topItem.rawTitle, topItem.itemFg, topItem.itemHotkeyFg, topItem.itemBg, topItem.selected && menuBar.effectivePalette.isMonochrome, menuBar.effectivePalette.isMonochrome)
                 }
 
                 MouseArea {
@@ -250,8 +253,8 @@ Rectangle {
         anchors.rightMargin: 1
         y: 0
         text: menuBar.rightStatusText
-        color: TvTheme.barFg
-        backgroundColor: TvTheme.barBg
+        color: menuBar.effectivePalette.barFg
+        backgroundColor: menuBar.effectivePalette.barBg
         bold: true
     }
 
@@ -259,6 +262,7 @@ Rectangle {
         id: pullDown
 
         owner: menuBar
+        palette: menuBar.palette
         onActionTriggered: actionId => {
             menuBar.activeMenuIndex = -1;
             menuBar.actionTriggered(actionId);

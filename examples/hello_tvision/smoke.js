@@ -8,5 +8,9 @@ function main(app) {
     app.press("O");
     app.press("F9");
     app.expectText("Turbo Cyan");
+    app.press("O");
+    app.waitForText("Amber CRT (Custom)");
+    app.press("A");
+    app.expectText("Amber CRT");
     app.press("X", ["Alt"]);
 }

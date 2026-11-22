@@ -59,4 +59,16 @@ if(QMLTUI_TVISION_BUILD_TESTS AND _ex_runner)
         ROWS 26
         CLOCK VIRTUAL
     )
+    if(QMLTUI_RECORD_DIR)
+        qmltui_add_scenario(
+            NAME tvision_hello_demo
+            TARGET tvision_hello
+            SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/demo.js"
+            COLUMNS 92
+            ROWS 26
+            CLOCK VIRTUAL
+            RECORD hello_tvision.cast
+            LABELS Demo
+        )
+    endif()
 endif()

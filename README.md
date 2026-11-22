@@ -2,6 +2,8 @@
 
 Borland Turbo Vision-inspired **Multi-Document Interface (MDI)** desktop windowing, pull-down menus, tilde-mnemonics, beveled buttons, modal dialogs, per-file themes, and custom `TextGridBuffer` primitives (`TvDesktopSurface`, `TvDropShadow`, `TvDragHandle`) built natively on [QmlTui](https://github.com/qmltui/qmltui)'s retained-mode QML scene graph.
 
+![QmlTui.TVision Minimal Example](docs/assets/casts/hello_tvision.gif)
+
 For a full-scale application built on `QmlTui.TVision`, see [`turbo_hex`](https://github.com/qmltui/apps/tree/main/apps/turbo_hex) in [`qmltui/apps`](https://github.com/qmltui/apps).
 
 ## Provided Types (`import QmlTui.TVision`)

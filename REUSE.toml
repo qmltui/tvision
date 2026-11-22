@@ -1,0 +1,16 @@
+version = 1
+SPDX-PackageName = "qmltui-tvision"
+SPDX-PackageSupplier = "Yosri Ayed"
+SPDX-PackageDownloadLocation = "https://github.com/qmltui/tvision"
+
+[[annotations]]
+path = ["**", ".gitignore", ".qmlls.ini", "jsconfig.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Yosri Ayed"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = ["**/*.md", "*.md"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Yosri Ayed"
+SPDX-License-Identifier = "CC-BY-4.0"

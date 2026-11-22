@@ -47,6 +47,19 @@ if(_tvision_is_top_level)
     if(QMLTUI_TVISION_BUILD_TESTS)
         find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
     endif()
+    set(QMLTUI_RECORD_DIR "${PROJECT_SOURCE_DIR}/docs/assets/casts")
+    file(MAKE_DIRECTORY "${QMLTUI_RECORD_DIR}")
+    find_program(QMLTUI_AGG_EXECUTABLE NAMES agg HINTS "$ENV{HOME}/.cargo/bin")
+    if(QMLTUI_AGG_EXECUTABLE)
+        set(QMLTUI_RECORD_POST_COMMAND
+            "${QMLTUI_AGG_EXECUTABLE}"
+            --theme asciinema
+            --text-font-family "JetBrains Mono,Fira Code,SF Mono,Menlo,Consolas,Adwaita Mono,JetBrainsMono Nerd Font,Noto Sans Symbols 2,DejaVu Sans Mono,Liberation Mono"
+            --quiet
+            "<CAST>"
+            "<CAST_STEM>.gif"
+        )
+    endif()
 endif()
 
 if(NOT QT_QML_OUTPUT_DIRECTORY)
